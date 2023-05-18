@@ -1,10 +1,38 @@
 ﻿  Compiling CUDA source file kernel.cu...
   
   D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body>"D:\Archivos de programa\NVIDIA GPU Computing Toolkit\CUDA\v12.0\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu   -I"D:\Program Files\Common Files\MSVC\freeglut\include\GL" -ID:\GL\GLUTbin\include -ID:\GL\GLEWbin\bin\Release\x64 -I"D:\Archivos de programa\NVIDIA GPU Computing Toolkit\CUDA\v12.0\include" -I"D:\Archivos de programa\NVIDIA GPU Computing Toolkit\CUDA\v12.0\include"  -G   --keep-dir x64\Debug  -maxrregcount=0  --machine 64 --compile -cudart static  -g  -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc143.pdb /FS /Zi /RTC1 /MDd " -o "D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\x64\Debug\kernel.cu.obj" "D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu" 
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(22): error : identifier "float5" is undefined
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(22): error : identifier "float5" is undefined
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(42): error : identifier "float5" is undefined
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(44): error : identifier "float5" is undefined
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(52): error : identifier "float5" is undefined
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(53): error : identifier "float5" is undefined
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(53): error : identifier "globalX" is undefined
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(53): error : expected an expression
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(53): error : expected a ";"
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(54): error : identifier "globalA" is undefined
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(54): error : expected an expression
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(54): error : expected a ";"
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(55): error : expected a ";"
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(60): error : identifier "myPosition" is undefined
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(69): error : expected a ";"
+  
+D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(70): error : identifier "acc4" is undefined
+  
+  16 errors detected in the compilation of "D:/rfmrm/Documentos/ISGC/8 Semestre/Programacion Avanzada en Paralelo/Repo/N-Body/N-Body/kernel.cu".
   kernel.cu
-  tmpxft_000081b0_00000000-7_kernel.cudafe1.cpp
-D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(75): warning C4305: '+=': truncation from 'double' to 'float'
-D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu(148): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-     Creating library D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\x64\Debug\N-Body.lib and object D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\x64\Debug\N-Body.exp
-LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
-  N-Body.vcxproj -> D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\x64\Debug\N-Body.exe
+D:\Archivos de programa\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\BuildCustomizations\CUDA 12.0.targets(794,9): error MSB3721: The command ""D:\Archivos de programa\NVIDIA GPU Computing Toolkit\CUDA\v12.0\bin\nvcc.exe" -gencode=arch=compute_52,code=\"sm_52,compute_52\" --use-local-env -ccbin "D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\bin\HostX64\x64" -x cu   -I"D:\Program Files\Common Files\MSVC\freeglut\include\GL" -ID:\GL\GLUTbin\include -ID:\GL\GLEWbin\bin\Release\x64 -I"D:\Archivos de programa\NVIDIA GPU Computing Toolkit\CUDA\v12.0\include" -I"D:\Archivos de programa\NVIDIA GPU Computing Toolkit\CUDA\v12.0\include"  -G   --keep-dir x64\Debug  -maxrregcount=0  --machine 64 --compile -cudart static  -g  -DWIN32 -DWIN64 -D_DEBUG -D_CONSOLE -D_MBCS -Xcompiler "/EHsc /W3 /nologo /Od /Fdx64\Debug\vc143.pdb /FS /Zi /RTC1 /MDd " -o "D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\x64\Debug\kernel.cu.obj" "D:\rfmrm\Documentos\ISGC\8 Semestre\Programacion Avanzada en Paralelo\Repo\N-Body\N-Body\kernel.cu"" exited with code 2.

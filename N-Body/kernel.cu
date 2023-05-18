@@ -10,11 +10,16 @@
 #include <time.h>
 
 
-#define N 15000 // Number of particles
+#define N 4000 // Number of particles
 #define p 256  // Number of particles per tile
 #define EPS2 1e-6f
+#define TEST 2
+#define MAX_W 2.0f
+#define MIN_W 0.1f
 
-__device__ float3 bodyBodyInteraction (float4 bi, float4 bj, float3 ai) {
+#define TOP_SPEED = 3.0f
+
+__device__ float3 bodyBodyInteraction (float5 bi, float5 bj, float3 ai) {
     float3 r;
     // r_ij [3 FLOPS]
     r.x = bj.x - bi.x;
@@ -34,9 +39,9 @@ __device__ float3 bodyBodyInteraction (float4 bi, float4 bj, float3 ai) {
     return ai;
 }
 
-__device__ float3 tile_calculation (float4 myPosition, float3 accel) {
+__device__ float3 tile_calculation (float5 myPosition, float3 accel) {
     int i;
-    extern __shared__ float4 shPosition[];
+    extern __shared__ float5 shPosition[];
     for (i = 0; i < blockDim.x; i++) {
         accel = bodyBodyInteraction(myPosition, shPosition[i], accel);
     }
@@ -44,13 +49,14 @@ __device__ float3 tile_calculation (float4 myPosition, float3 accel) {
 }
 
 __global__ void calculate_forces (void* devX, void* devA) {
-    extern __shared__ float4 shPosition[];
-    float4* globalX = (float4*)devX;
-    float4* globalA = (float4*)devA;
-    float4 myPosition;
+    extern __shared__ float5 shPosition[];
+    float5* globalX = (float5*)devX;
+    float5* globalA = (float5*)devA;
+    float5 myPosition;
     int i, tile;
-    float3 acc = { 0.0f, 0.0f, 0.0f };
     int gtid = blockIdx.x * blockDim.x + threadIdx.x;
+    float3 acc = { globalX[gtid].v[0], globalX[gtid].v[0], globalX[gtid].v[0] }; // Aceleracion "Creemos"
+    
     myPosition = globalX[gtid];
     for (i = 0, tile = 0; i < N; i += p, tile++) {
         int idx = tile * blockDim.x + threadIdx.x;
@@ -60,7 +66,7 @@ __global__ void calculate_forces (void* devX, void* devA) {
         // __syncthreads();
     }
     // Save the result in global memory for the integration step.
-    float4 acc4 = { acc.x, acc.y, acc.z, 0.0f };
+    float5 acc4 = { acc.x, acc.y, acc.z, 0.0f , 0.0f};
     globalA[gtid] = acc4;
 }
 
@@ -86,7 +92,18 @@ void displayMe(void) {
     glFlush();
 }
 
-float4 hostX[N]; // Host array for particle positions
+//  X Y Z W(PESO) V(VELOCIDAD)
+struct float5
+{
+    float x;
+    float y;
+    float z;
+    float w;
+    float v[3];
+};
+
+
+float5 hostX[N]; // Host array for particle positions
 void displayParticles() {
     glClear(GL_COLOR_BUFFER_BIT);
     glBegin(GL_POINTS);
@@ -106,6 +123,12 @@ void displayParticles() {
             y = 20 * sin(j) + hostX[i].y;
             //glVertex2f(x, y);
         }*/
+        if (i < N / 2) {
+            glColor3f(0.702, 0, 0.941);
+        }
+        else {
+            glColor3f(0.941, 0.667, 0);
+        }
     }
     glEnd();
     glFlush();
@@ -113,10 +136,12 @@ void displayParticles() {
 
 
 
+
+
 int main(int argc, char** argv)
 {
    
-    float4 hostA[N]; // Host array for particle acceleration
+    float5 hostA[N]; // Host array for particle acceleration
     
     /*
     // Initialize particle positions on the host
@@ -146,65 +171,80 @@ int main(int argc, char** argv)
 
     // Initialize particle positions randomly on the host
     srand(time(NULL));
-    for (int i = 0; i < 15000; i++) {
-        hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random x-coordinate between -1 and 1
-        hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random y-coordinate between -1 and 1
-        hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+    for (int i = 0; i < N; i++) {
+        if (i <= N / 2) {
+            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (150)); // Random x-coordinate between -1 and 1
+            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (150)); // Random y-coordinate between -1 and 1
+            hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+        }
+        else {
+            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (150)); // Random x-coordinate between -1 and 1
+            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (150)); // Random y-coordinate between -1 and 1
+            hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+
+        }
         //hostX[i].w = 1.0f; // Set mass to 1
 
         // Generate a random mass within the desired range
-        float minMass = 0.10f;  // Minimum mass
-        float maxMass = 1.0f; // Maximum mass
-        float randomMass = minMass + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxMass - minMass)));
+        //float minMass = 0.10f;  // Minimum mass
+        //float maxMass = 10.0f; // Maximum mass
+        float randomMass = MIN_W + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (MAX_W - MIN_W))); // Valores Min y Max definidos global
 
         // Assign the random mass to the particle
         hostX[i].w = randomMass;
+        
+        float a = 5.0;
+
+        hostX[i].v[0] = (((float)rand() / (float)(RAND_MAX)) * a);
+        hostX[i].v[1] = (((float)rand() / (float)(RAND_MAX)) * a);
+        hostX[i].v[2] = (((float)rand() / (float)(RAND_MAX)) * a);
+    
     }
 
-    for (int i = 2000; i < 4000; i++) {
-        hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random x-coordinate between -1 and 1
-        hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random y-coordinate between -1 and 1
-        hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
-        //hostX[i].w = 1.0f; // Set mass to 1
+    //for (int i = 1000; i < 2000; i++) {
+    //    hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random x-coordinate between -1 and 1
+    //    hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random y-coordinate between -1 and 1
+    //    hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+    //    //hostX[i].w = 1.0f; // Set mass to 1
 
-        // Generate a random mass within the desired range
-        float minMass = 0.10f;  // Minimum mass
-        float maxMass = 1.0f; // Maximum mass
-        float randomMass = minMass + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxMass - minMass)));
+    //    // Generate a random mass within the desired range
+    //    float minMass = 0.10f;  // Minimum mass
+    //    float maxMass = 1.0f; // Maximum mass
+    //    float randomMass = minMass + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxMass - minMass)));
 
-        // Assign the random mass to the particle
-        hostX[i].w = randomMass;
-    }
+    //    // Assign the random mass to the particle
+    //    hostX[i].w = randomMass;
+    //}
 
-    for (int i = 4000; i < 6000; i++) {
-        hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random x-coordinate between -1 and 1
-        hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random y-coordinate between -1 and 1
-        hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
-        //hostX[i].w = 1.0f; // Set mass to 1
+    //for (int i = 2000; i < 3000; i++) {
+    //    hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random x-coordinate between -1 and 1
+    //    hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random y-coordinate between -1 and 1
+    //    hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+    //    //hostX[i].w = 1.0f; // Set mass to 1
 
-        // Generate a random mass within the desired range
-        float minMass = 0.10f;  // Minimum mass
-        float maxMass = 1.0f; // Maximum mass
-        float randomMass = minMass + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxMass - minMass)));
+    //    // Generate a random mass within the desired range
+    //    float minMass = 0.10f;  // Minimum mass
+    //    float maxMass = 1.0f; // Maximum mass
+    //    float randomMass = minMass + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxMass - minMass)));
 
-        // Assign the random mass to the particle
-        hostX[i].w = randomMass;
-    }
+    //    // Assign the random mass to the particle
+    //    hostX[i].w = randomMass;
+    //}
 
-    for (int i = 6000; i < 8000; i++) {
-        hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random x-coordinate between -1 and 1
-        hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random y-coordinate between -1 and 1
-        hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
-        //hostX[i].w = 1.0f; // Set mass to 1
+    //for (int i = 3000; i < 4000; i++) {
+    //    hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random x-coordinate between -1 and 1
+    //    hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random y-coordinate between -1 and 1
+    //    hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+    //    //hostX[i].w = 1.0f; // Set mass to 1
 
-        // Generate a random mass within the desired range
-        float minMass = 0.10f;  // Minimum mass
-        float maxMass = 1.0f; // Maximum mass
-        float randomMass = minMass + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxMass - minMass)));
+    //    // Generate a random mass within the desired range
+    //    float minMass = 0.10f;  // Minimum mass
+    //    float maxMass = 1.0f; // Maximum mass
+    //    float randomMass = minMass + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxMass - minMass)));
 
-        // Assign the random mass to the particle
-        hostX[i].w = randomMass;
-    }
+    //    // Assign the random mass to the particle
+    //    hostX[i].w = randomMass;
+    //}
    
     /*
     2000
@@ -230,12 +270,12 @@ int main(int argc, char** argv)
 
     */
 
-    float4* devX; // Device array for particle positions
-    float4* devA; // Device array for particle acceleration
+    float5* devX; // Device array for particle positions
+    float5* devA; // Device array for particle acceleration
 
     // Allocate memory on the GPU for particle positions and acceleration
-    cudaMalloc((void**)&devX, N * sizeof(float4));
-    cudaMalloc((void**)&devA, N * sizeof(float4));
+    cudaMalloc((void**)&devX, N * sizeof(float5));
+    cudaMalloc((void**)&devA, N * sizeof(float5));
 
 
     // Define grid and block sizes
@@ -258,45 +298,20 @@ int main(int argc, char** argv)
     }
 
     // Set up OpenGL viewport
-    
-    /*
-    //glViewport(0, 0, 800, 600);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    //gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
-    //gluOrtho2D(-780, 780, -420, 420);
-    glOrtho(0, 800, 0, 600, -1, 1);
-    
-
-    /*
-    glViewport(0, 0, 800, 600);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
-    ///
-
-
-    glutDisplayFunc(displayParticles);
-    glutMainLoop();
-    */
-
-
-    
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     // setting window dimension in X- and Y- direction
     gluOrtho2D(-780, 780, -420, 420);
 
     glutDisplayFunc(displayParticles);
-    //glutMainLoop();
 
     // Main simulation loop
     while (true) {
         // Run the CUDA kernel to calculate forces
-        calculate_forces << <grid, block, p * sizeof(float4) >> > (devX, devA);
+        calculate_forces << <grid, block, p * sizeof(float5) >> > (devX, devA);
 
         // Transfer particle acceleration from device to host memory
-        cudaMemcpy(hostA, devA, N * sizeof(float4), cudaMemcpyDeviceToHost);
+        cudaMemcpy(hostA, devA, N * sizeof(float5), cudaMemcpyDeviceToHost);
         
         // Update particle positions based on the calculated accelerations
         for (int i = 0; i < N; i++) {
@@ -305,13 +320,7 @@ int main(int argc, char** argv)
         }
 
         // Transfer particle positions from host to device memory
-        cudaMemcpy(devX, hostX, N * sizeof(float4), cudaMemcpyHostToDevice);
-
-        // Display particles using OpenGL
-        //glutSwapBuffers();
-        //glutPostRedisplay();
-        //glutDisplayFunc(displayParticles);
-
+        cudaMemcpy(devX, hostX, N * sizeof(float5), cudaMemcpyHostToDevice);
 
         // Display particles using OpenGL
         displayParticles();
