@@ -10,7 +10,7 @@
 #include <time.h>
 
 
-#define N 8000 // Number of particles
+#define N 15000 // Number of particles
 #define p 256  // Number of particles per tile
 #define EPS2 1e-6f
 
@@ -146,10 +146,10 @@ int main(int argc, char** argv)
 
     // Initialize particle positions randomly on the host
     srand(time(NULL));
-    for (int i = 0; i < N; i++) {
-        hostX[i].x = ((float)rand() / 1000) * 2.0f - 1.0f; // Random x-coordinate between -1 and 1
-        hostX[i].y = ((float)rand() / 1000) * 2.0f - 1.0f; // Random y-coordinate between -1 and 1
-        hostX[i].z = ((float)rand() / 1000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+    for (int i = 0; i < 15000; i++) {
+        hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random x-coordinate between -1 and 1
+        hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random y-coordinate between -1 and 1
+        hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
         //hostX[i].w = 1.0f; // Set mass to 1
 
         // Generate a random mass within the desired range
@@ -160,8 +160,52 @@ int main(int argc, char** argv)
         // Assign the random mass to the particle
         hostX[i].w = randomMass;
     }
-    
 
+    for (int i = 2000; i < 4000; i++) {
+        hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random x-coordinate between -1 and 1
+        hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random y-coordinate between -1 and 1
+        hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+        //hostX[i].w = 1.0f; // Set mass to 1
+
+        // Generate a random mass within the desired range
+        float minMass = 0.10f;  // Minimum mass
+        float maxMass = 1.0f; // Maximum mass
+        float randomMass = minMass + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxMass - minMass)));
+
+        // Assign the random mass to the particle
+        hostX[i].w = randomMass;
+    }
+
+    for (int i = 4000; i < 6000; i++) {
+        hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random x-coordinate between -1 and 1
+        hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random y-coordinate between -1 and 1
+        hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+        //hostX[i].w = 1.0f; // Set mass to 1
+
+        // Generate a random mass within the desired range
+        float minMass = 0.10f;  // Minimum mass
+        float maxMass = 1.0f; // Maximum mass
+        float randomMass = minMass + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxMass - minMass)));
+
+        // Assign the random mass to the particle
+        hostX[i].w = randomMass;
+    }
+
+    for (int i = 6000; i < 8000; i++) {
+        hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - 150; // Random x-coordinate between -1 and 1
+        hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random y-coordinate between -1 and 1
+        hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+        //hostX[i].w = 1.0f; // Set mass to 1
+
+        // Generate a random mass within the desired range
+        float minMass = 0.10f;  // Minimum mass
+        float maxMass = 1.0f; // Maximum mass
+        float randomMass = minMass + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxMass - minMass)));
+
+        // Assign the random mass to the particle
+        hostX[i].w = randomMass;
+    }
+   
     /*
     2000
     10000
