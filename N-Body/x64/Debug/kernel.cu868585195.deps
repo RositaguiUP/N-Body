@@ -1,4 +1,5 @@
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Auxiliary\VS\include\GL\glew.h
+D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\algorithm
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\atomic
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\cctype
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\cerrno
@@ -33,7 +34,9 @@ D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\memory
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\new
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\ostream
+D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\random
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\sal.h
+D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\sstream
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\stdarg.h
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\stdexcept
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\stdint.h
@@ -51,7 +54,9 @@ D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\vcruntime_new_debug.h
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\vcruntime_string.h
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\vcruntime_typeinfo.h
+D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\vector
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\xatomic.h
+D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\xbit_ops.h
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\xcall_once.h
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\xerrc.h
 D:\Archivos de programa\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.34.31933\include\xfacet

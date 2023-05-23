@@ -12,9 +12,15 @@
 #include <string.h>
 #include <string>
 #include <iostream>
+#include <random>
+
+#include <fstream>
+#include <vector>
+#include <sstream>
 
 
-#define N 4000 // Number of particles
+//#define N 15628 // Number of particles
+#define N 8000
 #define p 256  // Number of particles per tile
 #define EPS2 1e-6f
 #define TEST 2
@@ -45,9 +51,9 @@ __device__ float3 bodyBodyInteraction (float5 bi, float5 bj, float3 ai) {
     float invDistCube = 1.0f / sqrtf(distSixth);
     // s = m_j * invDistCube [1 FLOP]
     float s = bj.w * invDistCube;
-    if (s >= 10.0f)
+    if (s >= 15.0f)
     {
-        s = 10.0f;
+        s = 15.0f;
     }
     // a_i = a_i + s * r_ij [6 FLOPS]
     ai.x += r.x * s;
@@ -144,12 +150,39 @@ void displayParticles() {
 }
 
 
-
+struct Coordenada {
+    float x;
+    float y;
+    float z;
+};
 
 
 int main(int argc, char** argv)
 {
-   
+    std::string nombreArchivo = "coords.txt";
+    //std::vector<Coordenada> coordenadas = leerArchivoCoordenadas(nombreArchivo);
+    std::ifstream archivo(nombreArchivo);
+    std::vector<Coordenada> coordenadas;
+    std::string linea;
+    int count = 0;
+    while (std::getline(archivo, linea)) {
+        std::istringstream iss(linea);
+        Coordenada coord;
+
+        if (!(iss >> coord.x >> coord.y >> coord.z)) {
+            std::cerr << "Error al leer la línea: " << linea << std::endl;
+            continue;
+        }
+        //printf("coors %d, %d, %d", coord.x, coord.y, coord.z);
+        if (count == 0) {
+            coordenadas.push_back(coord);
+            count = 7;
+        }
+        count--;
+    }
+
+    archivo.close();
+  
     float5 hostA[N]; // Host array for particle acceleration
     
     /*
@@ -188,38 +221,47 @@ int main(int argc, char** argv)
     }
     */
     //coor = open("coors.txt");
-    for (int i = 1; i < N; i++) {
+
+
+    for (int i = 0; i < N; i++) {
         /*Lectura de archivo ERRONEA
         std::string line = "";
         line = fgetc(fptr);
         std::cout <<line ;
+          hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (300)); // Random x-coordinate between -1 and 1
+            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (300)); // Random y-coordinate between -1 and 1
+            hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
         */
-        if (i <= 1000) {
-            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (300)); // Random x-coordinate between -1 and 1
-            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (300)); // Random y-coordinate between -1 and 1
-            hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+
+        float x = coordenadas[i].x;
+
+        float y = coordenadas[i].y;
+
+        float z = coordenadas[i].z;
+        //if (i <= N) {
+        //    hostX[i].x = x; // Random x-coordinate between -1 and 1
+        //    hostX[i].y = y; // Random y-coordinate between -1 and 1
+        //    hostX[i].z = z; // Random z-coordinate between -1 and 1
+        //}
+        // CONFIG 1
+        if (i <= N / 2)
+        {
+            hostX[i].x = ((float)rand() / 1000) * 2.0f - 1.0f +(rand() % (150)); // Random x-coordinate between -1 and 1
+            hostX[i].y = ((float)rand() / 1000) * 2.0f - 1.0f -(rand() % (150)); // Random y-coordinate between -1 and 1
+            hostX[i].z = ((float)rand() / 1000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
         }
-        if (i <= 2000) {
-            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (300)); // Random x-coordinate between -1 and 1
-            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (300)); // Random y-coordinate between -1 and 1
-            hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+        else {
+            hostX[i].x = ((float)rand() / 1000) * 2.0f - 1.0f - (rand() % (150)); // Random x-coordinate between -1 and 1
+            hostX[i].y = ((float)rand() / 1000) * 2.0f - 1.0f + (rand() % (150)); // Random y-coordinate between -1 and 1
+            hostX[i].z = ((float)rand() / 1000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
         }
-        if (i <= 3000) {
-            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (300)); // Random x-coordinate between -1 and 1
-            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (300)); // Random y-coordinate between -1 and 1
-            hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
-        }
-        if (i <= 4000) {
-            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (300)); // Random x-coordinate between -1 and 1
-            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (300)); // Random y-coordinate between -1 and 1
-            hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
-        }
+       
         //hostX[i].w = 1.0f; // Set mass to 1
 
         // Generate a random mass within the desired range
-        //float minMass = 0.10f;  // Minimum mass
-        //float maxMass = 10.0f; // Maximum mass
-        float randomMass = MIN_W + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (MAX_W - MIN_W))); // Valores Min y Max definidos global
+        float minMass = 0.10f;  // Minimum mass
+        float maxMass = 1.0f; // Maximum mass
+        float randomMass = minMass + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (maxMass - minMass))); // Valores Min y Max definidos global
 
         // Assign the random mass to the particle
         hostX[i].w = randomMass;
@@ -232,23 +274,27 @@ int main(int argc, char** argv)
 ------------------
             3/4
         */
-        // Buscar mover de positivo a negativo
-        hostX[i].v[0] = (((float)rand() / (float)(RAND_MAX)) * a);
-        hostX[i].v[1] = (((float)rand() / (float)(RAND_MAX)) * a);
-        hostX[i].v[2] = (((float)rand() / (float)(RAND_MAX)) * a);
+        std::random_device rd;
+        std::mt19937 gen(rd());  // Generador de números aleatorios
+        std::uniform_int_distribution<int> distribucion(-2, 2);  // Rango de valores aleatorios
+
+        int AX = distribucion(gen);
+        int AY = distribucion(gen);
+        int AZ = distribucion(gen);
+        /*int AX = 0;
+        int AY = 0;
+        int AZ = 0;
+        */// Buscar mover de positivo a negativo
+        hostX[i].v[0] = float(AX);
+        hostX[i].v[1] = float(AY);
+        hostX[i].v[2] = float(AZ);
 
        
         
     
     }
 
-    hostX[0].x = ((float)rand() / 10000) * 2.0f - 1.0f ; // Random x-coordinate between -1 and 1
-    hostX[0].y = ((float)rand() / 10000) * 2.0f - 1.0f ; // Random y-coordinate between -1 and 1
-    hostX[0].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
-    hostX[0].w = 20.0f;
-    hostX[0].v[0] = 0;
-    hostX[0].v[1] = 0;
-    hostX[0].v[2] = 0;
+
 
     //for (int i = 1000; i < 2000; i++) {
     //    hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random x-coordinate between -1 and 1
