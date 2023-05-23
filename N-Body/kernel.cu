@@ -8,6 +8,10 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <fstream>
+#include <string.h>
+#include <string>
+#include <iostream>
 
 
 #define N 4000 // Number of particles
@@ -17,7 +21,16 @@
 #define MAX_W 2.0f
 #define MIN_W 0.1f
 
-#define TOP_SPEED = 3.0f
+#define TOP_rand = 200
+struct float5
+{
+    float x;
+    float y;
+    float z;
+    float w;
+    float v[3];
+};
+
 
 __device__ float3 bodyBodyInteraction (float5 bi, float5 bj, float3 ai) {
     float3 r;
@@ -32,6 +45,10 @@ __device__ float3 bodyBodyInteraction (float5 bi, float5 bj, float3 ai) {
     float invDistCube = 1.0f / sqrtf(distSixth);
     // s = m_j * invDistCube [1 FLOP]
     float s = bj.w * invDistCube;
+    if (s >= 10.0f)
+    {
+        s = 10.0f;
+    }
     // a_i = a_i + s * r_ij [6 FLOPS]
     ai.x += r.x * s;
     ai.y += r.y * s;
@@ -55,7 +72,7 @@ __global__ void calculate_forces (void* devX, void* devA) {
     float5 myPosition;
     int i, tile;
     int gtid = blockIdx.x * blockDim.x + threadIdx.x;
-    float3 acc = { globalX[gtid].v[0], globalX[gtid].v[0], globalX[gtid].v[0] }; // Aceleracion "Creemos"
+    float3 acc = { globalX[gtid].v[0], globalX[gtid].v[1], globalX[gtid].v[2] }; // Aceleracion "Creemos"
     
     myPosition = globalX[gtid];
     for (i = 0, tile = 0; i < N; i += p, tile++) {
@@ -93,14 +110,6 @@ void displayMe(void) {
 }
 
 //  X Y Z W(PESO) V(VELOCIDAD)
-struct float5
-{
-    float x;
-    float y;
-    float z;
-    float w;
-    float v[3];
-};
 
 
 float5 hostX[N]; // Host array for particle positions
@@ -171,17 +180,39 @@ int main(int argc, char** argv)
 
     // Initialize particle positions randomly on the host
     srand(time(NULL));
-    for (int i = 0; i < N; i++) {
-        if (i <= N / 2) {
-            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (150)); // Random x-coordinate between -1 and 1
-            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (150)); // Random y-coordinate between -1 and 1
+    /*FILE* fptr;
+    if ((fptr = fopen("coords.txt", "r")) == NULL)
+    {
+        printf("ERROR");
+        exit(1);
+    }
+    */
+    //coor = open("coors.txt");
+    for (int i = 1; i < N; i++) {
+        /*Lectura de archivo ERRONEA
+        std::string line = "";
+        line = fgetc(fptr);
+        std::cout <<line ;
+        */
+        if (i <= 1000) {
+            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (300)); // Random x-coordinate between -1 and 1
+            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (300)); // Random y-coordinate between -1 and 1
             hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
         }
-        else {
-            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (150)); // Random x-coordinate between -1 and 1
-            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (150)); // Random y-coordinate between -1 and 1
+        if (i <= 2000) {
+            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (300)); // Random x-coordinate between -1 and 1
+            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (300)); // Random y-coordinate between -1 and 1
             hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
-
+        }
+        if (i <= 3000) {
+            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (300)); // Random x-coordinate between -1 and 1
+            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (300)); // Random y-coordinate between -1 and 1
+            hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+        }
+        if (i <= 4000) {
+            hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f - (rand() % (300)); // Random x-coordinate between -1 and 1
+            hostX[i].y = ((float)rand() / 10000) * 2.0f - 1.0f + (rand() % (300)); // Random y-coordinate between -1 and 1
+            hostX[i].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
         }
         //hostX[i].w = 1.0f; // Set mass to 1
 
@@ -193,13 +224,31 @@ int main(int argc, char** argv)
         // Assign the random mass to the particle
         hostX[i].w = randomMass;
         
-        float a = 5.0;
+        float a = 2.0;
 
+        /*
+        El random siempre es positivo, por eso se van al primer cuadrante 
+            2/1
+------------------
+            3/4
+        */
+        // Buscar mover de positivo a negativo
         hostX[i].v[0] = (((float)rand() / (float)(RAND_MAX)) * a);
         hostX[i].v[1] = (((float)rand() / (float)(RAND_MAX)) * a);
         hostX[i].v[2] = (((float)rand() / (float)(RAND_MAX)) * a);
+
+       
+        
     
     }
+
+    hostX[0].x = ((float)rand() / 10000) * 2.0f - 1.0f ; // Random x-coordinate between -1 and 1
+    hostX[0].y = ((float)rand() / 10000) * 2.0f - 1.0f ; // Random y-coordinate between -1 and 1
+    hostX[0].z = ((float)rand() / 10000) * 2.0f - 1.0f; // Random z-coordinate between -1 and 1
+    hostX[0].w = 20.0f;
+    hostX[0].v[0] = 0;
+    hostX[0].v[1] = 0;
+    hostX[0].v[2] = 0;
 
     //for (int i = 1000; i < 2000; i++) {
     //    hostX[i].x = ((float)rand() / 10000) * 2.0f - 1.0f + 150; // Random x-coordinate between -1 and 1
